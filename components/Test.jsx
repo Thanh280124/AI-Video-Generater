@@ -5,7 +5,7 @@ export default class Test extends Component {
   render() {
     return (
       <View>
-        <Text> textInComponent </Text>
+        <Text> test 1234 </Text>
       </View>
     )
   }
