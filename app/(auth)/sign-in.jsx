@@ -43,8 +43,8 @@ const SignIn = () => {
     <SafeAreaView className="bg-primary flex-1">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}keyboardShouldPersistTaps='handled'>
         <View className="flex-1 justify-center px-4">
-          <Image source={images.logo} resizeMode="contain" style={{ width: 115, height: 35 }} />
-          <Text className="text-2xl text-white font-semibold mt-10">Log in to Aora</Text>
+          <Image source={images.profile} resizeMode="contain" style={{ width: 115, height: 100 }} />
+          <Text className="text-2xl text-white font-semibold mt-10">Log in to NKL</Text>
           <FormField 
           title ='Email'
           value ={form.email}

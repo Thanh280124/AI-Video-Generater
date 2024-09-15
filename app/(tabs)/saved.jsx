@@ -13,6 +13,11 @@ const Saved = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchLikedVideos = async () => {
+    if (!user || !user.$id) {
+      console.error("User or user.$id is undefined");
+      return;
+    }
+    
     try {
       const videos = await getLikedVideos(user.$id);
       setLikedVideos(videos);
@@ -24,7 +29,7 @@ const Saved = () => {
   useFocusEffect(
     useCallback(() => {
       fetchLikedVideos();
-    }, [user.$id])
+    }, [user?.$id]) // Optional chaining to safely access user.$id
   );
 
   const onRefresh = async () => {
@@ -33,13 +38,21 @@ const Saved = () => {
     setRefreshing(false);
   };
 
+  if (!user || !user.$id) {
+    return (
+      <SafeAreaView className='bg-primary h-full'>
+        <Text className='text-white text-center'>Loading user data...</Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView className='bg-primary h-full'>
       <FlatList 
         data={likedVideos}
         keyExtractor={(item) => item.$id}
         renderItem={({ item }) => (
-          <VideoCard video={item} onDelete={fetchLikedVideos} /> // Ensure fetchLikedVideos is used
+          <VideoCard video={item} onDelete={fetchLikedVideos} />
         )}
         ListHeaderComponent={() => (
           <View className='my-6 px-4'>
@@ -56,6 +69,5 @@ const Saved = () => {
     </SafeAreaView>
   );
 };
-
 
 export default Saved;

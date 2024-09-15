@@ -46,8 +46,8 @@ const {data:latestPosts} = useAppwrite(getLatestPosts)
                       </View>
 
                       <View className = 'mt-1.5'> 
-                        <Image source={images.logoSmall}
-                        className ='w-9 h-10'
+                        <Image source={images.profile}
+                        className ='w-9 h-11'
                         resizeMode='contain'
                         />
                       </View>

@@ -3,17 +3,18 @@ import React, { useState, useRef, useEffect } from 'react';
 import { icons } from '../constants';
 import { Video, ResizeMode } from 'expo-av';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { saveLikedVideo, deleteLikedVideo, getLikedVideos } from '../lib/appwrite'; // Import functions
+import { saveLikedVideo, deleteLikedVideo, getLikedVideos } from '../lib/appwrite';
 
 const VideoCard2 = ({ video: { title, thumbnail, video, creator: { username, avata }, $id } }) => {
   const [play, setPlay] = useState(false);
-  const [liked, setLiked] = useState(false); // State to toggle like/dislike
-  const scaleValue = useRef(new Animated.Value(1)).current; // Animation scale value
-  const { user, setUser } = useGlobalContext(); // Get the current user
+  const [liked, setLiked] = useState(false);
+  const scaleValue = useRef(new Animated.Value(1)).current;
+  const { user, setUser } = useGlobalContext();
 
   useEffect(() => {
-    // Fetch initial liked state
     const fetchLikedState = async () => {
+      if (!user?.$id) return; // Early return if user.$id is not available
+
       try {
         const likedVideos = await getLikedVideos(user.$id);
         const isLiked = likedVideos.some(likedVideo => likedVideo.videoId === $id);
@@ -24,7 +25,7 @@ const VideoCard2 = ({ video: { title, thumbnail, video, creator: { username, ava
     };
 
     fetchLikedState();
-  }, [user, $id]); // Re-run the effect if user or $id changes
+  }, [user, $id]);
 
   const toggleLike = async () => {
     Animated.sequence([
@@ -41,14 +42,19 @@ const VideoCard2 = ({ video: { title, thumbnail, video, creator: { username, ava
     ]).start();
 
     const newLikedState = !liked;
-    setLiked(newLikedState); // Toggle liked state
-    if (newLikedState) {
-      await saveLikedVideo(user.$id, $id);
-    } else {
-      await deleteLikedVideo(user.$id, $id);
+    setLiked(newLikedState);
+
+    try {
+      if (newLikedState) {
+        await saveLikedVideo(user.$id, $id);
+      } else {
+        await deleteLikedVideo(user.$id, $id);
+      }
+      const updatedLikedVideos = await getLikedVideos(user.$id);
+      setUser(prevState => ({ ...prevState, likedVideos: updatedLikedVideos }));
+    } catch (error) {
+      console.error("Error updating liked state:", error);
     }
-    const updatedLikedVideos = await getLikedVideos(user.$id);
-    setUser(prevState => ({ ...prevState, likedVideos: updatedLikedVideos }));
   };
 
   return (
@@ -68,7 +74,6 @@ const VideoCard2 = ({ video: { title, thumbnail, video, creator: { username, ava
           </View>
         </View>
 
-        {/* Heart Icon with Like/Dislike Toggle */}
         <View className='pt-1'>
           <TouchableOpacity onPress={toggleLike} activeOpacity={0.7}>
             <Animated.View style={{ transform: [{ scale: scaleValue }] }}>
@@ -76,14 +81,13 @@ const VideoCard2 = ({ video: { title, thumbnail, video, creator: { username, ava
                 source={icons.heart}
                 className='w-9 h-9'
                 resizeMode='contain'
-                style={{ tintColor: liked ? 'red' : 'white' }} // Change color based on liked state
+                style={{ tintColor: liked ? 'red' : 'white' }}
               />
             </Animated.View>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Video or Thumbnail */}
       {play ? (
         <Video
           source={{ uri: video }}
